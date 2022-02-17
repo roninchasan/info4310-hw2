@@ -9,7 +9,7 @@
             <svg id="court" width="470px" height="500px" style="transform: rotate(270deg);">
                 <g fill="none">
                     <!--  court outline & background -->
-                    <image id="wood-floor" x="2" y="0" width="500" xlink:href="images/wood-floor-pattern.jpeg" style="opacity: 0.7; transform: rotate(90deg) translate(0, -100%);"></image>
+                    <image id="wood-floor" x="0" y="0" width="500" xlink:href="images/wood-floor-pattern.jpeg" style="opacity: 0.7; transform: rotate(90deg) translate(0, -100%);"></image>
                     <!-- image from iStock by Getty Images (https://www.istockphoto.com/photos/light-wood-floor-texture) -->
                     <rect width="100%" height="100%" fill="none" stroke="#116cb6" stroke-width="2" />
                 
@@ -50,8 +50,19 @@
                 data = data.filter((d) => { return (d["TEAM_NAME"]==="New York Knicks")});
 
                 data.forEach(d => {
-                    // console.log(d["GAME_DATE"].slice(4,6) + "-" + d["GAME_DATE"].slice(6,8) + "-" + d["GAME_DATE"].slice(0,4))
                     d["GAME_DATE"] = d["GAME_DATE"].slice(4,6) + "-" + d["GAME_DATE"].slice(6,8) + "-" + d["GAME_DATE"].slice(0,4);
+                    d["LOC_X"] = Number(d["LOC_X"])
+                    d["LOC_Y"] = Math.min(Number(d["LOC_Y"]), 425) //push outliers from beyond halfcourt to halfcourt line
+                    d["GAME_EVENT_ID"] = Number(d["GAME_EVENT_ID"])
+                    d["GAME_ID"] = Number(d["GAME_ID"])
+                    d["MINUTES_REMAINING"] = Number(d["MINUTES_REMAINING"])
+                    d["SECONDS_REMAINING"] = Number(d["SECONDS_REMAINING"])
+                    d["SHOT_ATTEMPTED_FLAG"] = Number(d["SHOT_ATTEMPTED_FLAG"])
+                    d["SHOT_MADE_FLAG"] = Number(d["SHOT_MADE_FLAG"])
+                    d["PERIOD"] = Number(d["PERIOD"])
+                    d["SHOT_DISTANCE"] = Number(d["SHOT_DISTANCE"])
+                    d["TEAM_ID"] = Number(d["TEAM_ID"])
+
                 });
 
                 console.log(data);
@@ -64,22 +75,25 @@
                 const yExtent = d3.extent(data, d => d['LOC_Y']);
                 console.log(xExtent, yExtent)
 
-                const xMin = d3.min(data, d => d['LOC_X']);
-                const xMax = d3.max(data, d => d['LOC_X'])
-                console.log(xMin,xMax);
+                // const xMin = d3.min(data, d => d['LOC_X']);
+                // const xMax = d3.max(data, d => d['LOC_X'])
+                // console.log(xMin,xMax);
 
-                const xScale = d3.scaleLinear().domain(xExtent).range([0, width]);
+                const xScale = d3.scaleLinear().domain(xExtent).range([0, height]);
                 const yScale = d3.scaleLinear().domain(yExtent).range([0, width]);
                 console.log(xScale(-1));
                 // const countScale = d3.scaleLinear().domain(countExtent).range([chartHeight, 0]);
+                const shotMadeScale = d3.scaleOrdinal().domain([0,1]).range(['red', 'green'])
 
                 court.selectAll("circle")
                     .data(data).enter()
                     .append("circle")
-                    .attr("cx", d => xScale(d["LOC_X"]))
-		            .attr("cy", d => yScale(d["LOC_Y"]))
+                    .attr("cy", d => xScale(d["LOC_X"]))
+		            .attr("cx", d => yScale(d["LOC_Y"]))
                     .attr("r", 2)
-                    .attr("fill", "black")
+                    .attr("stroke", d => shotMadeScale(d['SHOT_MADE_FLAG']) )
+                    .attr("stroke-width", "2px")
+                    .attr("fill", "none")
                     .attr("opacity", .5)
 
             }
