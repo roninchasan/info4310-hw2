@@ -1,9 +1,19 @@
 <!DOCTYPE html>
 <html>
     <head>
-
+        <title>HW2</title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
     </head>
     <body>
         
+        <script>
+            const load = async function() {
+                let data = await d3.csv("nba_shotchartdetail_2018-19.csv");
+                data = data.filter((d) => { return (d["TEAM_NAME"]==="New York Knicks")});
+                console.log(data);
+            }
+            load();
+
+        </script>
     </body>
 </html>
