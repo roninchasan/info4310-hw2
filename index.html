@@ -5,11 +5,17 @@
         <script src="https://d3js.org/d3.v7.min.js"></script>
     </head>
     <body>
-        
+
         <script>
             const load = async function() {
                 let data = await d3.csv("nba_shotchartdetail_2018-19.csv");
                 data = data.filter((d) => { return (d["TEAM_NAME"]==="New York Knicks")});
+
+                data.forEach(d => {
+                    // console.log(d["GAME_DATE"].slice(4,6) + "-" + d["GAME_DATE"].slice(6,8) + "-" + d["GAME_DATE"].slice(0,4))
+                    d["GAME_DATE"] = d["GAME_DATE"].slice(4,6) + "-" + d["GAME_DATE"].slice(6,8) + "-" + d["GAME_DATE"].slice(0,4);
+                });
+
                 console.log(data);
             }
             load();
