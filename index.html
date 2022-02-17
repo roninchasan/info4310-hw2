@@ -6,7 +6,7 @@
     </head>
     <body>
         <div id="svg-container" style="display:block; width: 500px; margin: auto;">
-            <svg width="470px" height="500px" style="transform: rotate(270deg);">
+            <svg id="court" width="470px" height="500px" style="transform: rotate(270deg);">
                 <g fill="none">
                     <!--  court outline & background -->
                     <image id="wood-floor" x="2" y="0" width="500" xlink:href="images/wood-floor-pattern.jpeg" style="opacity: 0.7; transform: rotate(90deg) translate(0, -100%);"></image>
@@ -55,6 +55,33 @@
                 });
 
                 console.log(data);
+
+                const court = d3.select("svg#court");
+                const width = court.attr("width");
+                const height = court.attr("height");
+
+                const xExtent = d3.extent(data, d => d['LOC_X']);
+                const yExtent = d3.extent(data, d => d['LOC_Y']);
+                console.log(xExtent, yExtent)
+
+                const xMin = d3.min(data, d => d['LOC_X']);
+                const xMax = d3.max(data, d => d['LOC_X'])
+                console.log(xMin,xMax);
+
+                const xScale = d3.scaleLinear().domain(xExtent).range([0, width]);
+                const yScale = d3.scaleLinear().domain(yExtent).range([0, width]);
+                console.log(xScale(-1));
+                // const countScale = d3.scaleLinear().domain(countExtent).range([chartHeight, 0]);
+
+                court.selectAll("circle")
+                    .data(data).enter()
+                    .append("circle")
+                    .attr("cx", d => xScale(d["LOC_X"]))
+		            .attr("cy", d => yScale(d["LOC_Y"]))
+                    .attr("r", 2)
+                    .attr("fill", "black")
+                    .attr("opacity", .5)
+
             }
             load();
 
