@@ -56,6 +56,7 @@
                 data = data.filter((d) => { return (d["TEAM_NAME"]==="New York Knicks")});
 
                 let datesDict = {}
+                let players = []
 
                 data.forEach(d => {
                     d["GAME_DATE"] = d["GAME_DATE"].slice(4,6) + "-" + d["GAME_DATE"].slice(6,8) + "-" + d["GAME_DATE"].slice(0,4);
@@ -78,6 +79,11 @@
                             datesDict[d['GAME_DATE']] = "(at " + d['HTM']
                         }
                     }
+
+                    if (!players.includes(d['PLAYER_NAME'])) {
+                        players.push(d['PLAYER_NAME']);
+                    }
+
                     
                 });
 
@@ -114,46 +120,10 @@
 
                 console.log(mouseoverSVG)
 
-                function showGame(date) {
-                    let game = data.filter((d) => { return (d["GAME_DATE"]===date)});
-
-                    let circles = court.selectAll("circle")
-                        .data(game)
-                        .join('circle').attr("class", "bar")
-                        .on("mouseover", function(e, d){
-                            d3.select("text#player").text(d['PLAYER_NAME'])
-                            d3.select(this)
-                                .attr("fill", shotMadeScale(d['SHOT_MADE_FLAG']))
-                            mouseEntersPlot(e, d)
-                        })
-                        .on("mouseout", function(e, d){
-                            d3.select("text#player").text("")
-                            d3.selectAll("circle")
-                                .attr("fill", "none")
-                            mouseLeavesPlot()
-                        })
-                        .transition()
-                        .duration(500)
-                        .style("opacity", "0")
-                        .transition()
-                        .duration(0)
-                        .attr("cy", d => xScale(d["LOC_X"]))
-                        .attr("cx", d => yScale(d["LOC_Y"]))
-                        .attr("r", 3)
-                        .attr("stroke", d => shotMadeScale(d['SHOT_MADE_FLAG']) )
-                        .attr("stroke-width", "2.5px")
-                        .attr("fill", "none")
-                        .transition()
-                        .duration(500)
-                        .style("opacity", 0.7);
-                        
-                }
-
-                showGame("10-17-2018")
-
                 var select = d3.select("body")
                                 .append("div")
                                 .append("select")
+                                .attr("id", "gameSelect")
 
                 select.selectAll("option")
                         .data(Object.keys(datesDict))
@@ -164,8 +134,8 @@
                 
                 select
                     .on("change", function(d) {
-                        console.log(d.target.value);
-                        showGame(d.target.value);
+                        // console.log(d.target);
+                        filter();
                     });
 
                 let tooltipWidth = 120;
@@ -217,6 +187,60 @@
 
                 }
 
+                function filter() {
+                    let game = d3.select("#gameSelect").node().value;
+                    let player = d3.select("#playerSelect").node().value;
+                    // let gameSelect = document.getElementById("gameSelect")
+                    let filteredData = data.filter((d) => { return (d["GAME_DATE"] === game && d["PLAYER_NAME"]===player)});
+
+                    let circles = court.selectAll("circle")
+                        .data(filteredData)
+                        .join('circle').attr("class", "bar")
+                        .on("mouseover", function(e, d){
+                            d3.select("text#player").text(d['PLAYER_NAME'])
+                            d3.select(this)
+                                .attr("fill", shotMadeScale(d['SHOT_MADE_FLAG']))
+                            mouseEntersPlot(e, d)
+                        })
+                        .on("mouseout", function(e, d){
+                            d3.select("text#player").text("")
+                            d3.selectAll("circle")
+                                .attr("fill", "none")
+                            mouseLeavesPlot()
+                        })
+                        .transition()
+                        .duration(500)
+                        .style("opacity", "0")
+                        .transition()
+                        .duration(0)
+                        .attr("cy", d => xScale(d["LOC_X"]))
+                        .attr("cx", d => yScale(d["LOC_Y"]))
+                        .attr("r", 3)
+                        .attr("stroke", d => shotMadeScale(d['SHOT_MADE_FLAG']) )
+                        .attr("stroke-width", "2.5px")
+                        .attr("fill", "none")
+                        .transition()
+                        .duration(500)
+                        .style("opacity", 0.7);
+                }
+
+                var playerSelect = d3.select("body")
+                                        .append("div")
+                                        .append("select")
+                                        .attr("id", "playerSelect")
+
+                playerSelect.selectAll("option")
+                            .data(players)
+                            .enter()
+                                .append("option")
+                                .attr("value", function (d) { return d; })
+                                .text(function (d) { return d; });
+
+                playerSelect.on("change", function(d) {
+                    filter();
+                });
+
+                filter();
             }
             load();
 
