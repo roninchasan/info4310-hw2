@@ -194,10 +194,6 @@
                                 .attr("x", 0)
                                 .attr("y", 22);
                 
-                              
-            
-                d3.selectAll("circle").on("mouseenter", mouseEntersPlot);
-                d3.selectAll("circle").on("mouseout",  mouseLeavesPlot);
             
                 function mouseEntersPlot(e, d) {
                     tooltip.style("visibility","visible")
