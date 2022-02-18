@@ -42,7 +42,9 @@
                     <path d="M 55 290 A 40 40 0 0 0 55 210" fill="none" stroke="#fff" stroke-width="1" />
                 </g>
             </svg>
-    </div>
+
+            
+        </div>
 
         <script>
             const load = async function() {
@@ -73,16 +75,9 @@
 
                 const xExtent = d3.extent(data, d => d['LOC_X']);
                 const yExtent = d3.extent(data, d => d['LOC_Y']);
-                console.log(xExtent, yExtent)
-
-                // const xMin = d3.min(data, d => d['LOC_X']);
-                // const xMax = d3.max(data, d => d['LOC_X'])
-                // console.log(xMin,xMax);
 
                 const xScale = d3.scaleLinear().domain(xExtent).range([0, height]);
                 const yScale = d3.scaleLinear().domain(yExtent).range([0, width]);
-                console.log(xScale(-1));
-                // const countScale = d3.scaleLinear().domain(countExtent).range([chartHeight, 0]);
                 const shotMadeScale = d3.scaleOrdinal().domain([0,1]).range(['red', 'green'])
 
                 court.selectAll("circle")
@@ -96,9 +91,44 @@
                     .attr("fill", "none")
                     .attr("opacity", .5)
 
+                function showGame(date) {
+                    let game = data.filter((d) => { return (d["GAME_DATE"]===date)});
+
+                    court.selectAll("circle")
+                    .data(game)
+                    .join('circle').attr("class", "bar")
+                    .transition()
+                    .duration(1000)
+                    .attr("cy", d => xScale(d["LOC_X"]))
+		            .attr("cx", d => yScale(d["LOC_Y"]))
+                    .attr("r", 2)
+                    .attr("stroke", d => shotMadeScale(d['SHOT_MADE_FLAG']) )
+                    .attr("stroke-width", "2px")
+                    .attr("fill", "none")
+                    .attr("opacity", .5)
+                }
+
+                var select = d3.select("body")
+                                .append("div")
+                                .append("select")
+
+                select.selectAll("option")
+                        .data(data)
+                        .enter()
+                            .append("option")
+                            .attr("value", function (d) { return d["GAME_DATE"]; })
+                            .text(function (d) { return d["GAME_DATE"]; });
+                
+                select
+                    .on("change", function(d) {
+                        console.log(d.target.value);
+                        showGame(d.target.value);
+                    });
+
             }
             load();
 
         </script>
+
     </body>
 </html>
