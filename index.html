@@ -42,6 +42,10 @@
                     <path d="M 55 290 A 40 40 0 0 0 55 210" fill="none" stroke="#fff" stroke-width="1" />
                 </g>
             </svg>
+            <div>
+                <text id="FG"></text>
+                <text id="FG3"></text>
+            </div>
 
             <div id="mouseover-data">
                 <text id="player"></text>
@@ -88,7 +92,6 @@
                 });
 
                 console.log(data);
-                console.log(datesDict)
 
                 const court = d3.select("svg#court");
                 const width = court.attr("width");
@@ -167,7 +170,7 @@
             
                 function mouseEntersPlot(e, d) {
                     tooltip.style("visibility","visible")
-                    console.log(d)
+                    // console.log(d)
                 
                     let shot = d3.select(this);
                    
@@ -192,6 +195,25 @@
                     let player = d3.select("#playerSelect").node().value;
                     // let gameSelect = document.getElementById("gameSelect")
                     let filteredData = data.filter((d) => { return (d["GAME_DATE"] === game && d["PLAYER_NAME"]===player)});
+                    // console.log(filteredData);
+                    let numMade = 0;
+                    let numShot = 0;
+                    let numMade3 = 0;
+                    let numShot3 = 0
+                    filteredData.forEach(d => {
+                        numShot += 1;
+                        if (d['EVENT_TYPE'] === 'Made Shot') {
+                            numMade += 1;
+                        }
+                        if (d['SHOT_TYPE'] === '3PT Field Goal') {
+                            numShot3 += 1;
+                            if (d['EVENT_TYPE'] === 'Made Shot') {
+                                numMade3 += 1;
+                            }
+                        }
+                    });
+                    d3.select("text#FG").text('FG: ' + numMade + '/' + numShot + ', ' + (numMade/numShot).toFixed(2) + '%');
+                    d3.select("text#FG3").text('3P: ' + numMade3 + '/' + numShot3 + ', ' + (numMade3/numShot3).toFixed(2) + '%');
 
                     let circles = court.selectAll("circle")
                         .data(filteredData)
