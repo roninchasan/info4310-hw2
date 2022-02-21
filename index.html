@@ -396,17 +396,30 @@
                     gameCircles._groups[0].forEach((circle, width)=>{
                         let d = circle['__data__']
                         setTimeout(function(){
-                            d3.select("svg#court").append("circle")
-                                .attr("r", "6px")
-                                // .attr("height", "5px")
-                                .attr("fill", "orange")
-                                .attr("stroke", "black")
-                                .attr("stroke-width", 1.5)
+                            // d3.select("svg#court").append("circle")
+                            //     .attr("r", "6px")
+                            //     // .attr("height", "5px")
+                            //     .attr("fill", "orange")
+                            //     .attr("stroke", "black")
+                            //     .attr("stroke-width", 1.5)
+                            //     .attr("class", "shotCircle")
+                            //     .style("transform", `translate(${yScale(d['LOC_Y'])}, ${xScale(d['LOC_X'])})`)
+                            //     .transition()
+                            //     .duration(1200)
+                            //     .style("transform", `translate(${50}px, ${250}px)`)
+
+                            d3.select("svg#court").append("image")
+                                .attr("height", "18px")
+                                .attr("width", "18px")
+                                .attr("alignment-baseline", "middle")
+                                .style("transform-box", "fill-box")
+                                .style("transform-origin", "center")
+                                .attr("href", "images/basketball.png")
                                 .attr("class", "shotCircle")
-                                .style("transform", `translate(${yScale(d['LOC_Y'])}, ${xScale(d['LOC_X'])})`)
+                                .style("transform", `translate(${getNumericPixelVal(yScale(d['LOC_Y']))-9}px, ${getNumericPixelVal(xScale(d['LOC_X']))-9}px) rotate(1deg)`)
                                 .transition()
                                 .duration(1200)
-                                .style("transform", `translate(${50}px, ${250}px)`)
+                                .style("transform", `translate(${50-5}px, ${250-9}px) rotate(180deg)`)
 
 
                         }, ((i*1000)-200), d, width, court)
@@ -416,7 +429,7 @@
                     })
 
                     setTimeout(function(){
-                            d3.selectAll("circle.shotCircle").remove()
+                            d3.selectAll("image.shotCircle").remove()
 
                     }, (i*1000))
 
