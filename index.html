@@ -3,6 +3,15 @@
     <head>
         <title>HW2</title>
         <script src="https://d3js.org/d3.v7.min.js"></script>
+        <style>
+            * {
+                font-family: 'Trebuchet MS', Arial, sans-serif;
+            }
+
+            #tooltip{
+
+            }
+        </style>
     </head>
     <body>
         <div id="svg-container" style="display:block; width: 500px; margin: auto;">
@@ -92,6 +101,7 @@
                 });
 
                 console.log(data);
+                console.log(players)
 
                 const court = d3.select("svg#court");
                 const width = court.attr("width");
@@ -128,7 +138,11 @@
                                 .append("select")
                                 .attr("id", "gameSelect")
 
-                select.selectAll("option")
+                select.append("option")
+                                .attr("value", "all")
+                                .text("All games");
+
+                select.selectAll("gameSelect")
                         .data(Object.keys(datesDict))
                         .enter()
                             .append("option")
@@ -141,60 +155,117 @@
                         filter();
                     });
 
-                let tooltipWidth = 120;
-                let tooltipHeight = 40;
-            
-                let tooltip = court.append("g")
-                                .attr("class","tooltip")
-                                .attr("visibility","hidden");
-                tooltip.append("rect")
-                    .attr("fill", "black")
-                    .attr("opacity", 0.9)
-                    .attr("x", -tooltipWidth / 2.0)
-                    .attr("y", 0)
-                    .attr("width",tooltipWidth)
-                    .attr("height",tooltipHeight)
-                let txt = tooltip.append("text")
-                                .attr("fill", "white")
-                                .attr("text-anchor","middle")
+                function mouseEntersPlot(e, d, chartHeight, chartWidth) {
+
+
+                    let tooltipWidth = 196;
+                    let tooltipHeight = 40;
+                
+                    let tooltip = court.append("g")
+                                    .attr("class","tooltip")
+                                    .attr("opacity", 0)
+                                    // .attr("visibility","hidden");
+                    tooltip.append("rect")
+                        .attr("fill", "white")
+                        .attr("opacity", 0.8)
+                        .attr("x", -tooltipWidth / 2.0)
+                        .attr("y", 0)
+                        .attr("rx", "10")
+                        .attr("ry", "10")
+                        .attr("width",tooltipWidth)
+                        .attr("height",tooltipHeight)
+                        .attr("stroke", "orange")
+                        .attr("stroke-width", "1px")
+                    let txt = tooltip.append("text")
+                                    .attr("fill", "black")
+                                    .attr("text-anchor","left")
+                                    .attr("alignment-baseline","hanging")
+                                    .attr("x", (-tooltipWidth/2) + 43)
+                                    .attr("y", 5);
+                    let txt2 = tooltip.append("text")
+                                .attr("fill", "black")
+                                .attr("text-anchor","left")
                                 .attr("alignment-baseline","hanging")
-                                .attr("x", 0)
-                                .attr("y", 2);
-                let txt2 = tooltip.append("text")
-                                .attr("fill", "white")
-                                .attr("text-anchor","middle")
-                                .attr("alignment-baseline","hanging")
-                                .attr("x", 0)
-                                .attr("y", 22);
-                
-            
-                function mouseEntersPlot(e, d) {
-                    tooltip.style("visibility","visible")
-                    // console.log(d)
-                
-                    let shot = d3.select(this);
-                   
-                    txt.text(d['PLAYER_NAME']);
-                    txt2.text("Q" + d['PERIOD'] + " " + d['MINUTES_REMAINING'] + ":" + d['SECONDS_REMAINING']);
-                
+                                .attr("x", (-tooltipWidth/2) + 43)
+                                .attr("y", 25);
+
+                    let logo = tooltip.append("image")
+                        .attr("width", 32)
+                        .attr("x", -tooltipWidth / 2.0 + 5)
+                        .attr("y", "6")
+                        .attr("href","images/knicks-logo.svg")
+
+                    //quarter/period display handling
+                    let gameTimeTxt = ""
+                    if ( d['PERIOD'] == 5 ){
+                        gameTimeTxt = ("OT " + d['MINUTES_REMAINING'] + ":" + ("0" + d['SECONDS_REMAINING']).slice(-2));
+                    } else if ( d['PERIOD'] == 6 ){
+                        gameTimeTxt = ("2OT " + d['MINUTES_REMAINING'] + ":" + ("0" + d['SECONDS_REMAINING']).slice(-2));
+                    } else {
+                        gameTimeTxt = ("Q" + d['PERIOD'] + " " + d['MINUTES_REMAINING'] + ":" + ("0" + d['SECONDS_REMAINING']).slice(-2));
+                    }
+
+                    let game = d3.select("#gameSelect").node().value;
+                    let player = d3.select("#playerSelect").node().value;
+
+                    if ((game==="all")&&(player==="all")){
+                        txt.text(d['PLAYER_NAME']);
+                        txt2.text(d['GAME_DATE'])
+                    } else if (game==="all"){
+                        txt.text(d['GAME_DATE']);
+                        txt2.text(gameTimeTxt)
+                    } else if (player==="all"){
+                        txt.text(d['PLAYER_NAME']);
+                        txt2.text(gameTimeTxt)
+                    } else {
+                        txt.text(d['SHOT_TYPE']);
+                        txt2.text(gameTimeTxt)
+                    }               
+                    
                     let xPos = (xScale((d['LOC_X'])));
-                    let yPos = (yScale(d['LOC_Y']+tooltipHeight));
+                    let yPos = (yScale(d['LOC_Y']+tooltipHeight+5));
+
+                    //adjusting for tooltip overflow
+                    yPos = String(Math.min((getNumericPixelVal(chartHeight)-tooltipHeight-5), getNumericPixelVal(yPos))) + "px"
+
+                    halfTooltipWidth = tooltipWidth/2
+                    if (getNumericPixelVal(xPos)+halfTooltipWidth >= getNumericPixelVal(chartWidth)){
+                        xPos = String(getNumericPixelVal(chartWidth) - halfTooltipWidth + 27) + "px"
+                    } else if (getNumericPixelVal(xPos)-halfTooltipWidth <= 0){
+                        xPos = String(halfTooltipWidth + 3) + "px"
+                    }
                 
                     tooltip.style("transform",`translate(${yPos}, ${xPos}) rotate(90deg)`);
+                    d3.selectAll(".tooltip")
+                        .transition().duration(300)
+                        .attr("opacity", 1)
                 
                 }
             
                 function mouseLeavesPlot() {
-            
-                    tooltip.style("visibility","hidden");
 
+                    d3.selectAll(".tooltip").remove()
+                }
+
+                function getNumericPixelVal(str){
+                    return Number(str.substr(0, str.length-2))
                 }
 
                 function filter() {
                     let game = d3.select("#gameSelect").node().value;
                     let player = d3.select("#playerSelect").node().value;
                     // let gameSelect = document.getElementById("gameSelect")
-                    let filteredData = data.filter((d) => { return (d["GAME_DATE"] === game && d["PLAYER_NAME"]===player)});
+                    let filteredData = {}
+
+                    if ((game==="all")&&(player==="all")){
+                        filteredData = data //.filter((d) => { return (d["GAME_DATE"] === game && d["PLAYER_NAME"]===player)});
+                    } else if (game==="all"){
+                        filteredData = data.filter((d) => { return (d["PLAYER_NAME"]===player) });
+                    } else if (player==="all"){
+                        filteredData = data.filter((d) => { return (d["GAME_DATE"] === game)});
+                    } else {
+                        filteredData = data.filter((d) => { return (d["GAME_DATE"] === game && d["PLAYER_NAME"]===player)});
+                    }
                     // console.log(filteredData);
                     let numMade = 0;
                     let numShot = 0;
@@ -212,17 +283,18 @@
                             }
                         }
                     });
-                    d3.select("text#FG").text('FG: ' + numMade + '/' + numShot + ', ' + (numMade/numShot).toFixed(2) + '%');
-                    d3.select("text#FG3").text('3P: ' + numMade3 + '/' + numShot3 + ', ' + (numMade3/numShot3).toFixed(2) + '%');
+                    d3.select("text#FG").text('FG: ' + numMade + '/' + numShot + ', ' + (100 * numMade/numShot).toFixed(2) + '%');
+                    d3.select("text#FG3").text('3P: ' + numMade3 + '/' + numShot3 + ', ' + (100* numMade3/numShot3).toFixed(2) + '%');
+                    
 
                     let circles = court.selectAll("circle")
                         .data(filteredData)
                         .join('circle').attr("class", "bar")
                         .on("mouseover", function(e, d){
-                            d3.select("text#player").text(d['PLAYER_NAME'])
+                            // d3.select("text#player").text(d['PLAYER_NAME'])
                             d3.select(this)
                                 .attr("fill", shotMadeScale(d['SHOT_MADE_FLAG']))
-                            mouseEntersPlot(e, d)
+                            mouseEntersPlot(e, d, height, width)
                         })
                         .on("mouseout", function(e, d){
                             d3.select("text#player").text("")
@@ -251,7 +323,11 @@
                                         .append("select")
                                         .attr("id", "playerSelect")
 
-                playerSelect.selectAll("option")
+                playerSelect.append("option")
+                                .attr("value", "all")
+                                .text("All players");
+
+                playerSelect.selectAll("playerSelect")
                             .data(players)
                             .enter()
                                 .append("option")
