@@ -13,7 +13,7 @@
             }
         </style>
     </head>
-    <body>
+    <body style="background: rgba(0,128,255,.7);">
         <div id="svg-container" style="display:block; width: 500px; margin: auto;">
             <svg id="court" width="470px" height="500px" style="transform: rotate(270deg);">
                 <g fill="none">
@@ -133,27 +133,6 @@
 
                 console.log(mouseoverSVG)
 
-                var select = d3.select("body")
-                                .append("div")
-                                .append("select")
-                                .attr("id", "gameSelect")
-
-                select.append("option")
-                                .attr("value", "all")
-                                .text("All games");
-
-                select.selectAll("gameSelect")
-                        .data(Object.keys(datesDict))
-                        .enter()
-                            .append("option")
-                            .attr("value", function (d) { return d; })
-                            .text(function (d) { return d + " " + datesDict[d] + ")"; });
-                
-                select
-                    .on("change", function(d) {
-                        // console.log(d.target);
-                        filter();
-                    });
 
                 function mouseEntersPlot(e, d, chartHeight, chartWidth) {
 
@@ -318,10 +297,40 @@
                         .style("opacity", 0.7);
                 }
 
-                var playerSelect = d3.select("body")
+                var select = d3.select("div#svg-container")
+                                .append("div")
+                                .append("select")
+                                .attr("id", "gameSelect")
+                                .style("border", "1px solid black")
+                                .style("border-radius", "5px")
+                                .style("width", "35%")
+                                .style("margin-top", "10px")
+
+                select.append("option")
+                                .attr("value", "all")
+                                .text("All games");
+
+                select.selectAll("gameSelect")
+                        .data(Object.keys(datesDict))
+                        .enter()
+                            .append("option")
+                            .attr("value", function (d) { return d; })
+                            .text(function (d) { return d + " " + datesDict[d] + ")"; });
+                
+                select
+                    .on("change", function(d) {
+                        // console.log(d.target);
+                        filter();
+                    });
+
+                var playerSelect = d3.select("div#svg-container")
                                         .append("div")
                                         .append("select")
                                         .attr("id", "playerSelect")
+                                        .style("border", "1px solid black")
+                                        .style("border-radius", "5px")
+                                        .style("width", "35%")
+                                        .style("margin-top", "10px")
 
                 playerSelect.append("option")
                                 .attr("value", "all")
