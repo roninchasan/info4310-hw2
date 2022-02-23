@@ -19,8 +19,8 @@
                 justify-content: center;
                 background: rgba(255,255,255,0.3);
                 height: 450px;
-                border-top-left-radius: 15px;
-                border-bottom-left-radius: 15px;
+                border-top-left-radius: 5px;
+                border-bottom-left-radius: 5px;
                 padding: 10px;
                 margin-top: 15px;
             }
@@ -33,19 +33,32 @@
         </style>
     </head>
     <body style="background: rgba(0,128,255,.7);">
+        <div style="text-align: center;">
+            <h1>New York Knicks Shot Chart</h1>
+            <h3>2018-2019</h3>
+        </div>
+
         <div id="content-container" style="display:flex; justify-content:center;">
             <div id="controls-container">
-                <div>
-                    <text id="FG" style="display: block;"></text>
-                    <text id="FG3" style="display: block;"></text>
-                </div>
-
                 <div id="mouseover-data">
                     <text id="player"></text>
                 </div>
 
-                <button id="showGame">Show shots in game</button>
+                <div id="controls">
+                    <ol style="font-size: 14px;">
+                        <li>Filter by game and player.</li>
+                        <li>View the shot progression with Show Game.</li>
+                        <li>See shooting splits below.</li>
+                    </ol>
+                    <button id="showGame">Show shots in game</button>
+                </div>
+
+                <div>
+                    <text id="FG" style="display: block;"></text>
+                    <text id="FG3" style="display: block;"></text>
+                </div>
             </div>
+
 
             <div id="svg-container" style="display:block; width: 500px; margin: 0;">
 
@@ -139,27 +152,10 @@
 
                 const xScale = d3.scaleLinear().domain(xExtent).range([0, height]);
                 const yScale = d3.scaleLinear().domain(yExtent).range([0, width]);
-                const shotMadeScale = d3.scaleOrdinal().domain([0,1]).range(['red', 'green'])
-
-                // court.selectAll("circle")
-                //     .data(data).enter()
-                //     .append("circle")
-                //     .attr("cy", d => xScale(d["LOC_X"]))
-		        //     .attr("cx", d => yScale(d["LOC_Y"]))
-                //     .attr("r", 2)
-                //     .attr("stroke", d => shotMadeScale(d['SHOT_MADE_FLAG']) )
-                //     .attr("stroke-width", "2px")
-                //     .attr("fill", "none")
-                //     .attr("opacity", .5)
+                const shotMadeScale = d3.scaleOrdinal().domain([0,1]).range(['red', '#49be25'])
 
 
                 let mouseoverSVG = d3.select("#mouseover-data")
-                   
-                // let playerText = mouseoverSVG.append("text")
-                //         .attr("id", "player")
-
-                console.log(mouseoverSVG)
-
 
                 function mouseEntersPlot(e, d, chartHeight, chartWidth) {
 
@@ -303,13 +299,17 @@
                         .on("mouseover", function(e, d){
                             // d3.select("text#player").text(d['PLAYER_NAME'])
                             d3.select(this)
-                                .attr("fill", shotMadeScale(d['SHOT_MADE_FLAG']))
+                                // .attr("fill", shotMadeScale(d['SHOT_MADE_FLAG']))
+                                .attr("stroke", "black")
+                                .attr("stroke-width", "2px")
                             mouseEntersPlot(e, d, height, width)
                         })
                         .on("mouseout", function(e, d){
                             d3.select("text#player").text("")
                             d3.selectAll("circle.shot")
-                                .attr("fill", "none")
+                                // .attr("fill", "none")
+                                .attr("stroke", d => shotMadeScale(d['SHOT_MADE_FLAG']))
+                                .attr("stroke-width", "3px")
                             mouseLeavesPlot()
                         })
                         .transition()
@@ -320,9 +320,9 @@
                         .attr("cy", d => xScale(d["LOC_X"]))
                         .attr("cx", d => yScale(d["LOC_Y"]))
                         .attr("r", 3)
-                        .attr("stroke", d => shotMadeScale(d['SHOT_MADE_FLAG']) )
-                        .attr("stroke-width", "2.5px")
-                        .attr("fill", "none")
+                        .attr("stroke", d => shotMadeScale(d['SHOT_MADE_FLAG']))
+                        .attr("stroke-width", "3px")
+                        .attr("fill", d => shotMadeScale(d['SHOT_MADE_FLAG']))
                         // .delay(500)
                         .transition()
                         .duration(500)
@@ -330,7 +330,7 @@
                         .style("opacity", 0.7);
                 }
 
-                var select = d3.select("div#controls-container")
+                var select = d3.select("div#controls")
                                 .append("div")
                                 .append("select")
                                 .attr("id", "gameSelect")
@@ -356,7 +356,7 @@
                         filter();
                     });
 
-                var playerSelect = d3.select("div#controls-container")
+                var playerSelect = d3.select("div#controls")
                                         .append("div")
                                         .append("select")
                                         .attr("id", "playerSelect")
@@ -385,7 +385,7 @@
 
                     let gameCircles = d3.selectAll("circle.shot").style("opacity", 0)
                         .transition()
-                        .duration(1000)
+                        .duration(500)
                         .style("opacity", 1)
                         .attr("r", 7)
                         .delay(function(d,i){ return i*1000})
@@ -410,7 +410,7 @@
                             //     .style("transform", `translate(${50}px, ${250}px)`)
 
                             d3.select("svg#court").append("image")
-                                .attr("height", "18px")
+                                .attr("height", "18px") 
                                 .attr("width", "18px")
                                 .attr("alignment-baseline", "middle")
                                 .style("transform-box", "fill-box")
@@ -419,7 +419,7 @@
                                 .attr("class", "shotCircle")
                                 .style("transform", `translate(${getNumericPixelVal(yScale(d['LOC_Y']))-9}px, ${getNumericPixelVal(xScale(d['LOC_X']))-9}px) rotate(1deg)`)
                                 .transition()
-                                .duration(1200)
+                                .duration(800)
                                 .style("transform", `translate(${50-5}px, ${250-9}px) rotate(180deg)`)
                             
                             // image from Clipart Library (http://clipart-library.com/clipart/1144657.htm)
