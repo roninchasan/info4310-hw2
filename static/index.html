@@ -137,8 +137,7 @@
 
         <script>
             const load = async function() {
-                let data = await d3.csv("nba_shotchartdetail_2018-19.csv");
-                data = data.filter((d) => { return (d["TEAM_NAME"]==="New York Knicks")});
+                let data = await d3.csv("filtered_knicks_shotchartdetail_2018-19.csv");
 
                 let datesDict = {}
                 let players = []
