@@ -172,9 +172,6 @@
                     
                 });
 
-                console.log(data);
-                console.log(players)
-
                 const court = d3.select("svg#court");
                 const width = court.attr("width");
                 const height = court.attr("height");
@@ -304,7 +301,6 @@
                         filteredData = data.filter((d) => { return (d["GAME_DATE"] === game && d["PLAYER_NAME"]===player)});
                         document.getElementById('showGame').disabled = false
                     }
-                    // console.log(filteredData);
                     let numMade = 0;
                     let numShot = 0;
                     let numMade3 = 0;
@@ -412,7 +408,6 @@
                 
                 select
                     .on("change", function(d) {
-                        // console.log(d.target);
                         filter();
                     });
 
@@ -441,7 +436,6 @@
                 });
 
                 let showGame = d3.select("button#showGame").on("click", function(width, court) {
-                    console.log("test")
 
                     let gameCircles = d3.selectAll("circle.shot").style("opacity", 0)
                         .transition()
