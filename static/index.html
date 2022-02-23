@@ -19,23 +19,55 @@
                 justify-content: center;
                 background: rgba(255,255,255,0.3);
                 height: 450px;
-                border-top-left-radius: 5px;
-                border-bottom-left-radius: 5px;
+                border-top-left-radius: 15px;
+                border-bottom-left-radius: 15px;
                 padding: 10px;
                 margin-top: 15px;
             }
 
-            #controls-container div, #controls-container button, #controls-container select, #controls-container text{
+            #controls-container div, #controls-container button, #controls-container select, #controls-container text, #controls-container ol{
                 width: 200px;
                 font-size: 16px !important;
                 margin: 5px 0;
             }
+
+            ol li{
+                margin-bottom: 12px;
+            }
+
+            ol{
+                padding-left: 20px;
+            }
+
+            #showGame{
+                cursor: pointer;
+                border-radius: 5%;
+                border-radius: 10px;
+                transition: all 0.5s;
+                border: 1px solid grey;
+                height: 30px;
+            }
+
+            #showGame:enabled:hover{
+                background-color: white;
+                box-shadow: 0 0 25px 1px lightgrey;
+            }
+
+            #showGame:disabled{
+                cursor: not-allowed;
+                background-color:darkgrey;
+            }
+
+            select{
+                cursor: pointer;
+            }
+
         </style>
     </head>
     <body style="background: rgba(0,128,255,.7);">
         <div style="text-align: center;">
             <h1>New York Knicks Shot Chart</h1>
-            <h3>2018-2019</h3>
+            <h3>2018-19 NBA Regular Season</h3>
         </div>
 
         <div id="content-container" style="display:flex; justify-content:center;">
@@ -113,7 +145,7 @@
 
                 data.forEach(d => {
                     d["GAME_DATE"] = d["GAME_DATE"].slice(4,6) + "-" + d["GAME_DATE"].slice(6,8) + "-" + d["GAME_DATE"].slice(0,4);
-                    d["LOC_X"] = Number(d["LOC_X"])
+                    d["LOC_X"] = 99 - Number(d["LOC_X"])
                     d["LOC_Y"] = Math.min(Number(d["LOC_Y"]), 425) //push outliers from beyond halfcourt to halfcourt line
                     d["GAME_EVENT_ID"] = Number(d["GAME_EVENT_ID"])
                     d["GAME_ID"] = Number(d["GAME_ID"])
@@ -289,27 +321,55 @@
                             }
                         }
                     });
-                    d3.select("text#FG").text('FG: ' + numMade + '/' + numShot + ', ' + (100 * numMade/numShot).toFixed(2) + '%');
-                    d3.select("text#FG3").text('3P: ' + numMade3 + '/' + numShot3 + ', ' + (100* numMade3/numShot3).toFixed(2) + '%');
-                    
+                    if (numShot==0){
+                        d3.select("text#FG").text('FG: 0/0')
+                        d3.select("text#FG3").text('(No shots recorded)')
+                    } else if (numShot3==0){
+                        d3.select("text#FG").text('FG: ' + numMade + '/' + numShot + ', ' + (100 * numMade/numShot).toFixed(1) + '%');
+                        d3.select("text#FG3").text('3P: 0/0')
+                    } else {
+                        d3.select("text#FG").text('FG: ' + numMade + '/' + numShot + ', ' + (100 * numMade/numShot).toFixed(1) + '%');
+                        d3.select("text#FG3").text('3P: ' + numMade3 + '/' + numShot3 + ', ' + (100* numMade3/numShot3).toFixed(1) + '%');
+                    }
 
                     let circles = court.selectAll("circle.shot")
                         .data(filteredData)
                         .join('circle').attr("class", "shot")
                         .on("mouseover", function(e, d){
                             // d3.select("text#player").text(d['PLAYER_NAME'])
-                            d3.select(this)
-                                // .attr("fill", shotMadeScale(d['SHOT_MADE_FLAG']))
-                                .attr("stroke", "black")
-                                .attr("stroke-width", "2px")
+                            if (d['EVENT_TYPE']=="Missed Shot"){
+                                d3.select(this)
+                                    // .attr("fill", shotMadeScale(d['SHOT_MADE_FLAG']))
+                                    .raise()
+                                    .transition().duration(250)
+                                    .attr("stroke", "darkred")
+                                    .attr("stroke-width", "2px")
+                                    .attr("r", "5")
+                                    .style("opacity", "1")
+                            }
+                            else {
+                                d3.select(this)
+                                    // .attr("fill", shotMadeScale(d['SHOT_MADE_FLAG']))
+                                    .raise()
+                                    .transition().duration(250)
+                                    .attr("stroke", "darkgreen")
+                                    .attr("stroke-width", "2px")
+                                    .attr("r", "5")
+                                    .style("opacity", "1")
+                            }
                             mouseEntersPlot(e, d, height, width)
                         })
                         .on("mouseout", function(e, d){
                             d3.select("text#player").text("")
-                            d3.selectAll("circle.shot")
+                            d3.select(this)
                                 // .attr("fill", "none")
+                                // .lower()
+                                .transition().duration(250)
                                 .attr("stroke", d => shotMadeScale(d['SHOT_MADE_FLAG']))
                                 .attr("stroke-width", "3px")
+                                .attr("r", "3")
+                                .style("opacity", "0.7")
+                                
                             mouseLeavesPlot()
                         })
                         .transition()
@@ -409,19 +469,40 @@
                             //     .duration(1200)
                             //     .style("transform", `translate(${50}px, ${250}px)`)
 
-                            d3.select("svg#court").append("image")
-                                .attr("height", "18px") 
-                                .attr("width", "18px")
-                                .attr("alignment-baseline", "middle")
-                                .style("transform-box", "fill-box")
-                                .style("transform-origin", "center")
-                                .attr("href", "images/basketball.png")
-                                .attr("class", "shotCircle")
-                                .style("transform", `translate(${getNumericPixelVal(yScale(d['LOC_Y']))-9}px, ${getNumericPixelVal(xScale(d['LOC_X']))-9}px) rotate(1deg)`)
-                                .transition()
-                                .duration(800)
-                                .style("transform", `translate(${50-5}px, ${250-9}px) rotate(180deg)`)
-                            
+                            if (d['EVENT_TYPE'] === 'Made Shot') {
+
+                                d3.select("svg#court").append("image")
+                                    .attr("height", "18px") 
+                                    .attr("width", "18px")
+                                    .attr("alignment-baseline", "middle")
+                                    .style("transform-box", "fill-box")
+                                    .style("transform-origin", "center")
+                                    .attr("href", "images/basketball.png")
+                                    .attr("class", "shotCircle")
+                                    .style("transform", `translate(${getNumericPixelVal(yScale(d['LOC_Y']))-9}px, ${getNumericPixelVal(xScale(d['LOC_X']))-9}px) rotate(1deg)`)
+                                    .transition()
+                                    .duration(800)
+                                    .style("transform", `translate(${50-5}px, ${250-9}px) rotate(180deg)`)
+                            } else {
+                                d3.select("svg#court").append("image")
+                                    .attr("height", "18px") 
+                                    .attr("width", "18px")
+                                    .attr("alignment-baseline", "middle")
+                                    .style("transform-box", "fill-box")
+                                    .style("transform-origin", "center")
+                                    .attr("href", "images/basketball.png")
+                                    .attr("class", "shotCircle")
+                                    .style("transform", `translate(${getNumericPixelVal(yScale(d['LOC_Y']))-9}px, ${getNumericPixelVal(xScale(d['LOC_X']))-9}px) rotate(1deg)`)
+                                    .transition()
+                                    .duration(550)
+                                    .style("transform", `translate(${70-5}px, ${250-9}px) rotate(180deg)`)
+                                    .transition()
+                                    .duration(250)
+                                    .ease(d3.easePolyOut.exponent(3))
+                                    .style("transform", `translate(${85-5}px, ${250-9}px) rotate(180deg)`)
+                                    .style("opacity", "0")
+
+                            }
                             // image from Clipart Library (http://clipart-library.com/clipart/1144657.htm)
 
                         }, ((i*1000)-200), d, width, court)
