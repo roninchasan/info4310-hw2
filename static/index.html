@@ -22,7 +22,7 @@
                 height: 450px;
                 border-top-left-radius: 15px;
                 border-bottom-left-radius: 15px;
-                padding: 10px;
+                padding: 10px 10px 10px 20px;
                 margin-top: 15px;
             }
 
@@ -63,12 +63,28 @@
                 cursor: pointer;
             }
 
+            h1{
+                margin-bottom: 0;
+                color: white;
+            }
+
+            h3{
+                margin-top: 4px;
+            }
+
+            #intro{
+                max-width: 900px;
+                margin: auto auto 20px;
+                /* color: white; */
+            }
+
         </style>
     </head>
     <body style="background: rgba(0,128,255,.7);">
         <div style="text-align: center;">
             <h1>New York Knicks Shot Chart</h1>
             <h3>2018-19 NBA Regular Season</h3>
+            <p id="intro">This visualization represents every shot taken by the New York Knicks in the 2018-19 regular season. Green circles indicate a made shot, while red circles represent missed shots. See the control panel on the left to filter by player and/or game, as well as watch shots happen as they were made in-game.</p>
         </div>
 
         <div id="content-container" style="display:flex; justify-content:center;">
@@ -76,15 +92,17 @@
                 <div id="mouseover-data">
                     <text id="player"></text>
                 </div>
-
+                <ol style="font-size: 14px;">
+                    <li>Hover over a shot to see more details.</li>
+                    <li>Filter by game and player.</li>
+                    <li>View the shot progression with Show Game.</li>
+                    <li>See shooting splits below.</li>
+                </ol>
                 <div id="controls">
-                    <ol style="font-size: 14px;">
-                        <li>Filter by game and player.</li>
-                        <li>View the shot progression with Show Game.</li>
-                        <li>See shooting splits below.</li>
-                    </ol>
-                    <button id="showGame">Show shots in game</button>
+                   
+                    
                 </div>
+                <button id="showGame">Show shots in game</button>
 
                 <div>
                     <text id="FG" style="display: block;"></text>
